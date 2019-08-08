@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+
+# get absolute path to directory where script is located
+DIR_ROOT="$(dirname $0)"
+cd "${DIR_ROOT}"
+DIR_ROOT="$(pwd)"
+
+# get username & email
+ARGS=("$@")
+for idx in $(seq 0 `expr $# - 1`); do
+    ARG="${ARGS[${idx}]}"
+
+    if test "${ARG}" == "-u"; then
+        DEBFULLNAME="${ARGS[${idx}+1]}"
+    elif test "${ARG}" == "-e"; then
+        DEBEMAIL="${ARGS[${idx}+1]}"
+    fi
+done
+
+VER="1.5.20"
+BASENAME="wxsvg-${VER}"
+FILENAME="${BASENAME}.tar.bz2"
+FILE="${DIR_ROOT}/${FILENAME}"
+SOURCE="https://downloads.sourceforge.net/wxsvg/wxsvg/${VER}/${BASENAME}.tar.bz2"
+
+if test ! -f "${FILE}"; then
+	wget "${SOURCE}"
+else
+	echo -e "\nNot re-downloading source: ${FILE}"
+fi
+
+DHMAKE_DONE=false
+
+FILE_SETUP="${DIR_ROOT}/SETUP"
+if test -f "${FILE_SETUP}"; then
+	. "${FILE_SETUP}"
+fi
+
+if test -d "${DIR_ROOT}/libwxsvg/debian"; then
+    echo -e "\nWARNING: Not overwriting debian directory. Please delete if you would like to do so: ${DIR_ROOT}/libwxsvg/debian"
+else
+	echo -e "\nRunning dh_make ..."
+
+	if test ! -d "${DIR_ROOT}/libwxsvg"; then
+		mkdir -p "${DIR_ROOT}/libwxsvg"
+    elif test -d "${DIR_ROOT}/libwxsvg/debian"; then
+        echo -e "\nWARNING: overwriting old debian directory: ${DIR_ROOT}/libwxsvg/debian"
+        rm -r "${DIR_ROOT}/libwxsvg/debian"
+	fi
+
+	cd "${DIR_ROOT}/libwxsvg"
+
+    # maintainer & email values are automatically set by DEBFULLNAME & DEBEMAIL variables
+    export DEBFULLNAME DEBEMAIL
+
+	dh_make -y -l -c "custom" --copyrightfile "${DIR_ROOT}/LICENSE.txt" -p "libwxsvg_${VER}" -f "${FILE}"
+fi
+
+cd "${DIR_ROOT}"
+
