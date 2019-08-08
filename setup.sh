@@ -9,28 +9,28 @@ DIR_ROOT="$(pwd)"
 # get username & email
 ARGS=("$@")
 for idx in $(seq 0 `expr $# - 1`); do
-    ARG="${ARGS[${idx}]}"
+	ARG="${ARGS[${idx}]}"
 
-    if test "${ARG}" == "-u"; then
-        DEBFULLNAME="${ARGS[${idx}+1]}"
-    elif test "${ARG}" == "-e"; then
-        DEBEMAIL="${ARGS[${idx}+1]}"
-    fi
+	if test "${ARG}" == "-u"; then
+		DEBFULLNAME="${ARGS[${idx}+1]}"
+	elif test "${ARG}" == "-e"; then
+		DEBEMAIL="${ARGS[${idx}+1]}"
+	fi
 done
 
 FILE_INFO="${DIR_ROOT}/INFO"
 
 if test ! -f "${FILE_INFO}"; then
-    echo -e "\nERROR: Could not find info file: ${FILE_INFO}"
-    exit 1
+	echo -e "\nERROR: Could not find info file: ${FILE_INFO}"
+	exit 1
 fi
 
 . "${FILE_INFO}"
 
 # make sure required variables are available
 if test -z "${VER}"; then
-    echo -e "\nERROR: could not determine version info"
-    exit 1
+	echo -e "\nERROR: could not determine version info"
+	exit 1
 fi
 
 BASENAME="wxsvg-${VER}"
@@ -52,23 +52,39 @@ if test -f "${FILE_SETUP}"; then
 fi
 
 if test -d "${DIR_ROOT}/libwxsvg/debian"; then
-    echo -e "\nWARNING: Not overwriting debian directory. Please delete if you would like to do so: ${DIR_ROOT}/libwxsvg/debian"
+	echo -e "\nWARNING: Not overwriting debian directory. Please delete if you would like to do so: ${DIR_ROOT}/libwxsvg/debian"
 else
 	echo -e "\nRunning dh_make ..."
 
 	if test ! -d "${DIR_ROOT}/libwxsvg"; then
 		mkdir -p "${DIR_ROOT}/libwxsvg"
-    elif test -d "${DIR_ROOT}/libwxsvg/debian"; then
-        echo -e "\nWARNING: overwriting old debian directory: ${DIR_ROOT}/libwxsvg/debian"
-        rm -r "${DIR_ROOT}/libwxsvg/debian"
+	elif test -d "${DIR_ROOT}/libwxsvg/debian"; then
+		echo -e "\nWARNING: overwriting old debian directory: ${DIR_ROOT}/libwxsvg/debian"
+		rm -r "${DIR_ROOT}/libwxsvg/debian"
 	fi
 
 	cd "${DIR_ROOT}/libwxsvg"
 
-    # maintainer & email values are automatically set by DEBFULLNAME & DEBEMAIL variables
-    export DEBFULLNAME DEBEMAIL
+	# maintainer & email values are automatically set by DEBFULLNAME & DEBEMAIL variables
+	export DEBFULLNAME DEBEMAIL
 
 	dh_make -y -l -c "custom" --copyrightfile "${DIR_ROOT}/LICENSE.txt" -p "libwxsvg_${VER}" -f "${FILE}"
+
+	FILE_CTRL="${DIR_ROOT}/libwxsvg/debian/control"
+	echo -e "\nEditing ${FILE_CTRL} ..."
+
+	DESCR_LONG=" <long\n description>"
+	sed -i \
+		-e 's|libwxsvgBROKEN|libwxsvg|' \
+		-e 's|\(Build-Depends:.*$\)|\1, libwxgtk3.0-dev \| libwxgtk3.0-gtk3-dev|g' \
+		-e 's|\(Depends: ${shlibs:Depends}, ${misc:Depends}\)|\1, libwxgtk3.0-0v5 \| libwxgtk3.0-gtk3-0v5|g' \
+		-e 's|Homepage:.*$|Homepage: http://wxsvg.sourceforge.net/|g' \
+		-e 's|Description:.*$|Description: C++ library to create, manipulate and render Scalable Vector Graphics|g' \
+		-e "s|^.*<insert long description.*$|${DESCR_LONG}|g" \
+		-e '/#Vcs-.*$/d' \
+		"${FILE_CTRL}"
+
+	echo -e "\nDone!"
 fi
 
 cd "${DIR_ROOT}"
