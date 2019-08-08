@@ -18,7 +18,21 @@ for idx in $(seq 0 `expr $# - 1`); do
     fi
 done
 
-VER="1.5.20"
+FILE_INFO="${DIR_ROOT}/INFO"
+
+if test ! -f "${FILE_INFO}"; then
+    echo -e "\nERROR: Could not find info file: ${FILE_INFO}"
+    exit 1
+fi
+
+. "${FILE_INFO}"
+
+# make sure required variables are available
+if test -z "${VER}"; then
+    echo -e "\nERROR: could not determine version info"
+    exit 1
+fi
+
 BASENAME="wxsvg-${VER}"
 FILENAME="${BASENAME}.tar.bz2"
 FILE="${DIR_ROOT}/${FILENAME}"
