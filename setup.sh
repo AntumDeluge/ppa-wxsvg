@@ -109,7 +109,11 @@ override_dh_auto_install:
 
 	find debian/ -type f -name "*.[eE][xX]" -print -delete
 
-	# TODO: edit debian/changelog & debian/README.* & run buildpackage
+	echo -e "\nBuilding package ..."
+
+	dpkg-buildpackage -rfakeroot
+
+	# TODO: edit debian/changelog & debian/README.*
 
 	echo -e "\nDone!"
 fi
