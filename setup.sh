@@ -121,6 +121,19 @@ Name: wxsvg
 Repository: https://git.code.sf.net/p/wxsvg/git
 Repository-Browse: https://sourceforge.net/p/wxsvg/git/ci/master/tree/" > "${DIR_UPSTREAM}/metadata"
 
+	echo -e "\nAdding patches ..."
+	DIR_PATCHES="${DIR_ROOT}/libwxsvg/debian/patches"
+	if test -d "${DIR_ROOT}/patches"; then
+		for P in $(find "${DIR_ROOT}/patches" -type f -name "*.patch"); do
+			if test ! -d "${DIR_PATCHES}"; then
+				mkdir -p "${DIR_PATCHES}"
+			fi
+
+			cp "${P}" "${DIR_PATCHES}"
+			echo "$(basename ${P})" >> "${DIR_PATCHES}/series"
+		done
+	fi
+
 	echo -e "\nBuilding package ..."
 
 	dpkg-buildpackage -rfakeroot
