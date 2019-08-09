@@ -84,6 +84,29 @@ else
 		-e '/#Vcs-.*$/d' \
 		"${FILE_CTRL}"
 
+	# TODO: delete example files (*.ex|*.EX) & edit debian/changelog & debian/README.*
+
+	FILE_RULES="${DIR_ROOT}/libwxsvg/debian/rules"
+	echo -e "\nEditing ${FILE_RULES} ..."
+
+	echo -e "#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS=hardening=+all
+export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
+
+%:
+	dh \$@ --with=autoreconf
+
+override_dh_auto_configure:
+	dh_auto_configure -- --enable-static=no
+
+override_dh_missing:
+	dh_missing --fail-missing
+
+override_dh_auto_install:
+	dh_auto_install
+	find . -name \\*.la -delete" > "${FILE_RULES}"
+
 	echo -e "\nDone!"
 fi
 
