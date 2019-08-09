@@ -75,6 +75,7 @@ else
 
 	DESCR_LONG=" <long\n description>"
 	sed -i \
+		-e 's|Source: libwxsvg|Source: wxsvg|' \
 		-e 's|libwxsvgBROKEN|libwxsvg|' \
 		-e 's|\(Build-Depends:.*$\)|\1, libwxgtk3.0-dev \| libwxgtk3.0-gtk3-dev|g' \
 		-e 's|\(Depends: ${shlibs:Depends}, ${misc:Depends}\)|\1, libwxgtk3.0-0v5 \| libwxgtk3.0-gtk3-0v5|g' \
@@ -84,9 +85,12 @@ else
 		-e '/#Vcs-.*$/d' \
 		"${FILE_CTRL}"
 
-	FILE_RULES="${DIR_ROOT}/libwxsvg/debian/rules"
-	echo -e "\nEditing ${FILE_RULES} ..."
+	echo -e "\nEditing changelog ..."
+	FILE_CHANGES="${DIR_ROOT}/libwxsvg/debian/changelog"
+	sed -i -e 's|^libwxsvg\( (.*$\)|wxsvg\1|g' "${FILE_CHANGES}"
 
+	echo -e "\nEditing ${FILE_RULES} ..."
+	FILE_RULES="${DIR_ROOT}/libwxsvg/debian/rules"
 	echo -e "#!/usr/bin/make -f
 
 export DEB_BUILD_MAINT_OPTIONS=hardening=+all
