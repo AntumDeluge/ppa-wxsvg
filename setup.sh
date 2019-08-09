@@ -109,6 +109,18 @@ override_dh_auto_install:
 
 	find debian/ -type f -name "*.[eE][xX]" -print -delete
 
+	echo -e "\nAdding meta data ..."
+
+	DIR_UPSTREAM="${DIR_ROOT}/libwxsvg/debian/upstream"
+	if test ! -d "${DIR_UPSTREAM}"; then
+		mkdir -p "${DIR_UPSTREAM}"
+	fi
+
+	echo -e "---
+Name: wxsvg
+Repository: https://git.code.sf.net/p/wxsvg/git
+Repository-Browse: https://sourceforge.net/p/wxsvg/git/ci/master/tree/" > "${DIR_UPSTREAM}/metadata"
+
 	echo -e "\nBuilding package ..."
 
 	dpkg-buildpackage -rfakeroot
