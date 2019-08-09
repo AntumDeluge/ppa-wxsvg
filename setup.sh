@@ -84,8 +84,6 @@ else
 		-e '/#Vcs-.*$/d' \
 		"${FILE_CTRL}"
 
-	# TODO: delete example files (*.ex|*.EX) & edit debian/changelog & debian/README.*
-
 	FILE_RULES="${DIR_ROOT}/libwxsvg/debian/rules"
 	echo -e "\nEditing ${FILE_RULES} ..."
 
@@ -106,6 +104,12 @@ override_dh_missing:
 override_dh_auto_install:
 	dh_auto_install
 	find . -name \\*.la -delete" > "${FILE_RULES}"
+
+	echo -e "\nRemoving example files ..."
+
+	find debian/ -type f -name "*.[eE][xX]" -print -delete
+
+	# TODO: edit debian/changelog & debian/README.* & run buildpackage
 
 	echo -e "\nDone!"
 fi
